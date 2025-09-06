@@ -90,7 +90,6 @@ Built with modern web technologies, it features **robust authentication**, secur
 
 Create a `.env` file in `src/config/` with the following variables:
 
-```env
 # Server Configuration
 PORT=3000
 URL_FRONT=http://localhost:3000
@@ -127,7 +126,8 @@ To enable email services, follow these steps:
 
 1. Enable **2-Factor Authentication** on your Gmail account  
 2. Generate an **App Password** from your Google account security settings  
-3. Use the generated **App Password** in the `PASSWORD` field inside your `.env` file  
+3. Use the generated **App Password** in the `PASSWORD` field inside your `.env` file
+
 ## 📚 API Documentation
 
 ## 🚀 Base URL
