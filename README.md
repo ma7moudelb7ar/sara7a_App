@@ -553,7 +553,7 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  Made with ❤️ by Mahmoud El-Bahar
+  Made by Mahmoud El-Bahar♥️
 </p>
 
 <p align="center">
