@@ -121,3 +121,278 @@ EMAIL_TEST=test@example.com
 # Google OAuth2
 WEB_CLIENT_ID=your_google_client_id
 
+## 📧 Gmail Configuration
+
+To enable email services, follow these steps:
+
+1. Enable **2-Factor Authentication** on your Gmail account  
+2. Generate an **App Password** from your Google account security settings  
+3. Use the generated **App Password** in the `PASSWORD` field inside your `.env` file  
+## 📚 API Documentation
+
+## 🚀 Base URL
+http://localhost:3000
+
+## 🔐 Authentication
+Most endpoints require authentication. Use **JWT Token** in the request header:
+Authorization: Bearer_User YOUR_JWT_TOKEN
+
+## 👤 User Endpoints
+### Register User
+**POST** `/users/signup`  
+Content-Type: multipart/form-data  
+Example body:
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123!",
+  "cpassword": "SecurePass123!",
+  "age": 25,
+  "gender": "male",
+  "phone": "01234567890"
+}
+
+### Login
+**POST** `/users/signin`  
+Content-Type: application/json  
+Example body:
+{
+  "email": "john@example.com",
+  "password": "SecurePass123!"
+}
+
+### Get Profile
+**GET** `/users/getProfile`  
+Requires **JWT Token** in header.
+
+### Logout
+**POST** `/users/logOut`  
+Requires **JWT Token** in header.
+
+## 💌 Message Endpoints
+### Send Anonymous Message
+**POST** `/message/sendMessage`  
+Content-Type: application/json  
+Example body:
+{
+  "userId": "USER_OBJECT_ID",
+  "content": "Your anonymous message here"
+}
+
+### Get Received Messages
+**GET** `/message/getMessage`  
+Requires **JWT Token** in header.
+
+### Get Single Message
+**GET** `/message/getOneMessage/:messageId`  
+Requires **JWT Token** in header.
+
+## 📱 Response Format
+All responses follow this structure:
+{
+  "message": "Success message",
+  "data": { ... },
+  "error": "Error message (if any)"
+}
+
+## 🧪 API Testing (Postman)
+You can test all endpoints using Postman collection:  
+👉 [Postman Documentation](https://documenter.getpostman.com/view/45502181/2sB34kEJy5)
+
+## 📁 Project Structure
+
+```bash
+sara7a_App/
+├── index.js                    # Application entry point
+├── package.json                # Dependencies and scripts
+├── src/
+│   ├── app.controller.js       # Main app configuration
+│   ├── config/
+│   │   └── .env                # Environment variables
+│   ├── DB/
+│   │   ├── connectionDB.js     # Database connection
+│   │   └── models/             # Mongoose models
+│   │       ├── usermodel.js
+│   │       ├── message.model.js
+│   │       ├── BlackListedTokens.js
+│   │       └── RevokeTokenModel.js
+│   ├── middleware/             # Express middlewares
+│   │   ├── authentication.js
+│   │   ├── authorization.js
+│   │   ├── validation.js
+│   │   ├── multer.js
+│   │   └── GlobalError.js
+│   ├── modules/                # Feature modules
+│   │   ├── users/
+│   │   │   ├── user.controller.js
+│   │   │   ├── user.service.js
+│   │   │   └── user.validation.js
+│   │   └── messages/
+│   │       ├── message.controller.js
+│   │       ├── message.service.js
+│   │       └── message.validation.js
+│   ├── service/                # External services
+│   │   └── sendEmail.js
+│   ├── utils/                  # Utility functions
+│   │   ├── security/           # Security utilities
+│   │   ├── rules/              #  rules General
+│   │   └── email/              # Email utilities
+│   └── jobs/                   # Scheduled jobs
+│       └── cleanupJob.js
+└── uploads/                    # File uploads directory
+
+## 🔒 Security Features
+
+### 🛡️ Authentication & Authorization
+- JWT-based authentication with access and refresh tokens  
+- Role-based access control (User/Admin)  
+- Token blacklisting for secure logout  
+- Google OAuth2 integration  
+
+### 🔐 Data Protection
+- Password hashing with bcrypt (configurable salt rounds)  
+- Phone number encryption with AES  
+- Email verification required for account activation  
+- OTP-based password recovery  
+
+### 🚧 Request Security
+- Rate limiting (3 requests per minute)  
+- CORS configuration  
+- Helmet security headers  
+- Request validation with Joi  
+- File upload restrictions  
+
+### 🧹 Maintenance
+- Automatic cleanup of expired tokens and codes  
+- Scheduled database maintenance  
+- Account freeze/unfreeze functionality  
+## 🎨 Frontend Integration
+
+This API is designed to work with any frontend framework. Recommended stacks:
+
+### 📱 Mobile Apps
+- **React Native** - Cross-platform mobile development  
+- **Flutter** - Google's UI toolkit  
+
+### 💻 Web Applications
+- **React.js** - Component-based UI library  
+- **Vue.js** - Progressive JavaScript framework  
+- **Angular** - Full-featured framework  
+
+---
+
+### 🔗 Sample Frontend Integration
+
+#### Standard login example
+```javascript
+const standardLogin = async (email, password) => {
+  const response = await fetch('/users/signin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  return await response.json();
+};
+### Google login integration example (React)
+import { GoogleLogin } from '@react-oauth/google';
+
+const handleGoogleSuccess = async (credentialResponse) => {
+  try {
+    const response = await fetch('/users/loginWithGmail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        idToken: credentialResponse.credential 
+      })
+    });
+    
+    const data = await response.json();
+    // Store tokens and redirect user
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+  } catch (error) {
+    console.error('Google login error:', error);
+  }
+};
+### Send anonymous message example
+const sendMessage = async (userId, content) => {
+  const response = await fetch('/message/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, content })
+  });
+  return await response.json();
+};
+## 🐳 Docker Support (Optional)
+
+You can containerize this application using Docker.
+
+### Create a Dockerfile
+```dockerfile
+FROM node:22.15.0-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+## 📊 Performance Monitoring
+
+Recommended tools for monitoring and testing the application:
+
+- **PM2** - Process manager for production  
+- **MongoDB Compass** - Database GUI  
+- **Postman** - API testing  
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. **Fork** the repository  
+2. **Create** a feature branch  
+   ```bash
+git checkout -b feature/amazing-feature
+Commit your changes (git commit -m 'Add amazing feature')
+Push to the branch (git push origin feature/amazing-feature)
+Open a Pull Request
+
+📋 Development Guidelines
+
+Follow the existing code structure
+Add proper error handling
+Include input validation
+Write clear commit messages
+Update documentation when needed
+
+## 📄 License
+
+This project is licensed under the ISC License - see the LICENSE file for details.
+
+## 👨‍💻 Author
+
+** Ma7moud Elb7ar**  
+
+## 👨‍💻 Author
+
+**Mahmoud El-Bahar**  
+
+GitHub: [ma7moudelb7ar](https://github.com/ma7moudelb7ar)  
+Facebook: [ma7moudelb7ar](https://www.facebook.com/elbhar12)  
+Instagram: [ma7moudelb7ar](https://www.instagram.com/ma7moudelb7ar/)  
+LinkedIn: [ma7moudelb7ar](https://www.linkedin.com/in/mahmoud-elbhar-61b534328/)  
+Gmail: [ma7moudelb7ar](mailto:ma7moudelb7ar@gmail.com)
+
+## 🙏 Acknowledgments
+
+- **Express.js team** for the amazing framework  
+- **MongoDB team** for the robust database  
+- **All contributors and users** of this project
+
+
+
+
