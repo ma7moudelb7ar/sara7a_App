@@ -17,7 +17,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/License-ISC-blue.svg?style=for-the-badge" alt="License" />
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome" />
-  <img src="https://img.shields.io/badge/Made%20with-❤️-red.svg?style=for-the-badge" alt="Made with Love" />
+  <img src="style=for-the-badge" alt="Made with Love" />
 </p>
 
 <p align="center">
