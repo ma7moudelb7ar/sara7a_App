@@ -3,6 +3,8 @@ import { EventEmitter } from "node:events";
 import { sendEmail } from "../../service/sendEmail.js";
 import userModel from "../../DB/models/usermodel.js";
 import  CryptoJS from "crypto";
+import { confirmEmailTemplateLink } from "../../service/EmailTemplateLink.js";
+import { confirmEmailTemplateOtp } from "../../service/EmailTemplateOtp.js";
 
 export const eventEmitter = new EventEmitter();
 
@@ -45,7 +47,7 @@ eventEmitter.on("forgetPassword" , async (data) => {
 
     const isSend  = await sendEmail({
         to:email , 
-        html : `<h1> otp : ${otp}  </h1>`
+        html : confirmEmailTemplateOtp(otp , "Forget Password")
         })
 
     if (!isSend) {
@@ -55,10 +57,7 @@ eventEmitter.on("forgetPassword" , async (data) => {
 })
 
 
-eventEmitter.on("sendEmail" , async (data) => {
-
-    
-    
+eventEmitter.on("confirmEmail" , async (data) => {
     const {email} = data
 const token =  await generateToken({payload : {email} ,SIGNATURE:process.env.SIGNATURE_TOKEN, options :{ expiresIn: 60*2 }  })
 
@@ -68,7 +67,7 @@ const token =  await generateToken({payload : {email} ,SIGNATURE:process.env.SIG
 
     const isSend  = await sendEmail({
         to:email , 
-        html : `<a href="${link}"> click  </a>`
+        html : confirmEmailTemplateLink(link , "Confirm Email")
         })
 
     if (!isSend) {

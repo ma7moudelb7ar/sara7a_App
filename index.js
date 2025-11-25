@@ -4,7 +4,7 @@ dotenv.config({path : path.resolve("./src/config/.env")})
 import express from 'express'
 import bootstrap from './src/app.controller.js'
 import chalk from "chalk";
-import "./src/jobs/cleanupJob.js"
+// import "./src/jobs/cleanupJob.js"
 
 
 

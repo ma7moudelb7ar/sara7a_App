@@ -21,5 +21,18 @@ export const generalRules = {
         "postman-token" : Joi.string(),
         "user-agent" : Joi.string(),
         "content-type" : Joi.string(),
+    }) ,
+    file: Joi.object({
+        size: Joi.number().positive(),
+        path: Joi.string(),
+        filename: Joi.string(),
+        destination: Joi.string(),
+        mimetype: Joi.string(),
+        encoding: Joi.string(),
+        originalname: Joi.string(),
+        fieldname: Joi.string(),
+    }).messages({
+        "any.required": "File is required"
     })
+
 };

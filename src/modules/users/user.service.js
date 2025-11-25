@@ -1,40 +1,39 @@
 import { nanoid } from "nanoid";
 import userModel, { userProvider, userRole } from "../../DB/models/usermodel.js"
-import { generateToken ,refreshToken ,Encrypt , Decrypt ,Hash ,Compare ,eventEmitter} from "../../utils/index.js";
+import  { generateToken ,refreshToken ,Encrypt , Decrypt ,Hash ,Compare ,eventEmitter} from "../../utils/index.js";
 import RevokeTokenModel from './../../DB/models/RevokeTokenModel.js';
 import { customAlphabet } from 'nanoid'
 import  {OAuth2Client }from 'google-auth-library';
+import cloudinary from "../../utils/cloud/Cloudinary/index.js";
+
+const generateSlug = () => {
+  return Math.random().toString(36).slice(2, 10); 
+};
 
 
 export const createUser = async(req,res,next) => {
 
     const {name , email , phone , password , cpassword , age , gender } = req.body
 
-    if (!req?.files?.length) {
+    if (!req?.file) {
         throw new Error("profile required ");
     }
 
-    //check email
+
     if (  await  userModel.findOne({email})) {
     throw new Error ("email already exist " ,{cause: 400} )
     }
 
-    //hash password 
     const hash = await Hash({plainText : password,  SALT_ROUND : process.env.SALT_ROUND})
-    
-    //encrypt phone 
+
     const phoneEncrypt = await Encrypt({ plainText: phone, SECRET_KEY_PHONE :process.env.SECRET_KEY_PHONE})
     
-    eventEmitter.emit("sendEmail", { email });
+    eventEmitter.emit("confirmEmail", { email });
 
-    const pathFiles=[]
-    //upload
-    for (const file of req?.files) {
-        console.log(file);
-        
-    pathFiles.push(file.path)
-    }
-    //signup
+    const {secure_url , public_id} = await cloudinary.uploader.upload(req.file.path , {
+        folder : `users/${email}/profile`
+    })
+
     const user = await userModel.create({
         name , 
         email , 
@@ -43,7 +42,8 @@ export const createUser = async(req,res,next) => {
         cpassword ,
         age ,
         gender ,
-        coverImages : pathFiles
+        profileImage : {secure_url , public_id} ,
+        
     })
     await user.save()
 
@@ -413,3 +413,115 @@ export const unfreezeAccount = async (req, res ,next) => {
 
 
 };
+
+
+export const updateProfileImage = async (req, res ,next) => { 
+
+
+    const {secure_url , public_id} = await cloudinary.uploader.upload(req.file.path , {
+        folder : `users/${req.user.email}/profile`
+    })
+
+    const user = await userModel.findByIdAndUpdate({
+        _id :req.user._id
+    },{
+        profileImage : {secure_url , public_id}
+    } 
+)
+    await cloudinary.uploader.destroy(req?.user?.profileImage?.public_id)
+    
+    return res.status(200).json({message : "done" ,  user})
+
+};
+
+    export const getShareLink = async (req, res, next) => {
+    const user = await userModel.findById(req.user._id)
+        .select("shareProfile userName");
+
+    if (!user.shareProfile?.slug) {
+        return res.json({
+        isEnabled: false,
+        allowAnonymous: true,
+        shareUrl: null,
+        slug: null
+        });
+    }
+
+    const shareUrl = `${process.env.APP_URL}/u/${user.shareProfile.slug}`;
+
+    return res.status(200).json({
+        slug: user.shareProfile.slug,
+        isEnabled: user.shareProfile.isEnabled,
+        allowAnonymous: user.shareProfile.allowAnonymous,
+        allowImages: user.shareProfile.allowImages,
+        maxPerIpPerHour: user.shareProfile.maxPerIpPerHour,
+        shareUrl
+    });
+    };
+
+        export const updateShareLink = async (req, res, next) => {
+    const { slug, isEnabled, allowAnonymous, allowImages, maxPerIpPerHour } = req.body;
+
+    const user = await userModel.findById(req.user._id);
+
+    if (!user.shareProfile) user.shareProfile = {};
+
+    if (!user.shareProfile.slug && !slug) {
+        user.shareProfile.slug = generateSlug();
+    }
+
+    if (slug) {
+        const exists = await userModel.findOne({ "shareProfile.slug": slug, _id: { $ne: user._id } });
+        if (exists) {
+        return res.status(409).json({ message: "slug already in use" });
+        }
+        user.shareProfile.slug = slug.toLowerCase();
+    }
+
+    if (typeof isEnabled === "boolean") user.shareProfile.isEnabled = isEnabled;
+    if (typeof allowAnonymous === "boolean") user.shareProfile.allowAnonymous = allowAnonymous;
+    if (typeof allowImages === "boolean") user.shareProfile.allowImages = allowImages;
+    if (typeof maxPerIpPerHour === "number") user.shareProfile.maxPerIpPerHour = maxPerIpPerHour;
+
+    await user.save();
+
+    const shareUrl = `${process.env.APP_URL}/u/${user.shareProfile.slug}`;
+
+    return res.status(200).json({
+        message: "share link updated",
+        slug: user.shareProfile.slug,
+        isEnabled: user.shareProfile.isEnabled,
+        allowAnonymous: user.shareProfile.allowAnonymous,
+        allowImages: user.shareProfile.allowImages,
+        maxPerIpPerHour: user.shareProfile.maxPerIpPerHour,
+        shareUrl
+    });
+    };
+
+        export const regenShareLink = async (req, res, next) => {
+    const user = await userModel.findById(req.user._id);
+
+    if (!user.shareProfile) user.shareProfile = {};
+
+    let newSlug;
+    let exists = true;
+
+    while (exists) {
+        newSlug = generateSlug();
+        exists = await userModel.findOne({ "shareProfile.slug": newSlug });
+    }
+
+    user.shareProfile.slug = newSlug;
+    user.shareProfile.isEnabled = true; 
+    await user.save();
+
+    const shareUrl = `${process.env.APP_URL}/u/${newSlug}`;
+
+    return res.status(200).json({
+        message: "share link regenerated",
+        slug: newSlug,
+        shareUrl
+    });
+    };
+
+

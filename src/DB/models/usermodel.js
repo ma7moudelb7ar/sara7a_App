@@ -37,7 +37,9 @@ const userSchema = new mongoose.Schema({
     }, 
     password : {
         type:String,
-        required: userProvider?.system? true : false
+        required: function(){
+            return this.provider === userProvider.system
+        }
     }, 
     gender :{
         type:String ,
@@ -71,7 +73,10 @@ const userSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref:"user"
     }, 
-    image: String ,
+    profileImage: {
+        secure_url : String ,
+        public_id : String
+    } ,
     coverImages: [String] ,
     provider:{
         type: String ,
@@ -82,8 +87,33 @@ const userSchema = new mongoose.Schema({
     verificationCodeExpireAt: Date,
     codeCreatedAt: Date,
     failedAttempts: { type: Number, default: 0 },
-    isBannedUntil: Date
+    isBannedUntil: Date,
 
+    shareProfile: {
+    slug: {
+        type: String,
+        unique: true,
+        sparse: true, 
+        trim: true,
+        lowercase: true
+    },
+    isEnabled: {
+        type: Boolean,
+        default: false
+    },
+    allowAnonymous: {
+        type: Boolean,
+        default: true
+    },
+    allowImages: {          
+        type: Boolean,
+        default: true
+    },
+    maxPerIpPerHour: {      
+        type: Number,
+        default: 5
+    }
+    },
 
 },{
     timestamps:true

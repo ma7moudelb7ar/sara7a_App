@@ -8,7 +8,7 @@ import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 const limiter = rateLimit({
   windowMs: 60* 1000 ,
-  max : 3,
+  max : 15,
   statusCode: 429 ,
   message :{
     error : "Too many requests, please try again later."

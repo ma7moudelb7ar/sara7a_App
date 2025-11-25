@@ -15,6 +15,7 @@ export const signUpSchema = {
         phone:Joi.string().pattern(/^01[0-2,5]{1}[0-9]{8}$/).required(),
         
 }).required(), 
+    file : generalRules.file.required()
 };
 
 export const signINSchema = {
@@ -72,6 +73,9 @@ export const updateProfileSchema = {
         phone:Joi.string().pattern(/^01[0-2,5]{1}[0-9]{8}$/),
 }), 
 };
+export const updateProfileImageSchema = {
+    file : generalRules.file.required()   
+};
 
 
 export const getProfileDataSchema = {
@@ -99,4 +103,14 @@ export const unfreezeAccountSchema = {
     
         
 }), 
+};
+
+export const updateShareLinkSchema = {
+    body : Joi.object({
+        slug: Joi.string().min(3).max(30).pattern(/^[a-z0-9._-]+$/).optional(),
+        isEnabled: Joi.boolean().optional(),
+        allowAnonymous: Joi.boolean().optional(),
+        allowImages: Joi.boolean().optional(),
+        maxPerIpPerHour: Joi.number().min(1).max(50).optional()
+}).required(), 
 };

@@ -3,12 +3,13 @@ import fs from "node:fs"
 
 
 export const allowExtension = {
-  Image:['application/octet-stream' ,'image/jpeg'],
-  pdf:['application/pdf'],
+  Image:['application/octet-stream' ,'image/jpeg','image/png','image/jpg','image/gif','image/webp' , "image/x-icon" , "image/bmp"],
+  pdf:['application/pdf' , "application/x-pdf"  , "application/pdf"  ],
+  video : ["video/mp4" , "video/quicktime"]
+  
 } 
 
-
-export const Multer = (customPath , customExtension) => {
+export const MulterLocal = (customPath , customExtension) => {
 
   const fullPath =`uploads/${customPath}`
   if (!fs.existsSync(fullPath)) {
@@ -23,7 +24,6 @@ export const Multer = (customPath , customExtension) => {
     cb(null,uniqueSuffix + " " + file.originalname	 )
   }
 })
-
 function fileFilter (req, file, cb) {
 
   if (!customExtension.includes(file.mimetype)) {
@@ -34,9 +34,26 @@ function fileFilter (req, file, cb) {
      
      cb(null, true)
    }
+}
+
+const upload = multer( {storage,fileFilter} )
+    return upload
+}
+export const MulterHost = (customExtension) => {
 
 
+    const storage = multer.diskStorage({})
+    
+function fileFilter (req, file, cb) {
 
+  if (!customExtension.includes(file.mimetype)) {
+    
+    cb(new Error('Invalid extension'))
+  }
+   else{
+     
+     cb(null, true)
+   }
 }
 
 const upload = multer( {storage,fileFilter} )
