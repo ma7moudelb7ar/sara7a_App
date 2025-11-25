@@ -1,10 +1,11 @@
 import path from "path"
 import dotenv from "dotenv"
-dotenv.config({path : path.resolve("./src/config/.env")})
+// dotenv.config({path : path.resolve("./src/config/.env")})
+dotenv.config({})
 import express from 'express'
 import bootstrap from './src/app.controller.js'
 import chalk from "chalk";
-// import "./src/jobs/cleanupJob.js"
+import "./src/jobs/cleanupJob.js"
 
 
 
